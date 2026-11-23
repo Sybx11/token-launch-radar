@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar: pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<a class="skip" href="#board">Skip to the board</a>
+<header class="top">
+  <h1>Token Radar</h1>
+  <p class="lede">Every protocol in the sealed snapshot that records no token yet, ranked by what its
+  launch would be worth &mdash; priced against the live-token protocols in its own sector, not
+  against one flat multiple.</p>
+  <p class="meta" id="meta">Loading the sealed snapshot&hellip;</p>
+</header>
+<main id="board" tabindex="-1">
+  <section class="stats" id="stats" aria-label="Board totals"></section>
+  <nav class="tabs" aria-label="Views">
+    <button type="button" data-tab="board" class="active">Board</button>
+    <button type="button" data-tab="live">Live comparables</button>
+    <button type="button" data-tab="method">Method</button>
+  </nav>
+  <section class="panel" id="panel-board">
+    <div class="controls" role="search">
+      <label>Search <input id="q" type="search" placeholder="Protocol name or slug" autocomplete="off"></label>
+      <label>Category <select id="category"><option value="all">All categories</option></select></label>
+      <label>Chain <select id="chain"><option value="all">All chains</option></select></label>
+      <label>Min TVL <select id="mintvl">
+        <option value="0">Any TVL</option>
+        <option value="5000000">$5M+</option>
+        <option value="50000000">$50M+</option>
+        <option value="100000000">$100M+</option>
+        <option value="500000000">$500M+</option>
+      </select></label>
+      <label class="check"><input id="watchonly" type="checkbox"> Watchlist only</label>
+      <label>Sort <select id="sort">
+        <option value="implied">Implied value</option>
+        <option value="tvl">TVL</option>
+        <option value="change">7d change</option>
+        <option value="age">Age</option>
+      </select></label>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="tablewrap">
+      <table id="table">
+        <thead><tr>
+          <th data-sort="rank">#</th><th data-sort="name">Protocol</th><th data-sort="category">Category</th>
+          <th>Chains</th><th data-sort="tvl">TVL</th><th data-sort="change">7d</th>
+          <th data-sort="age">Age</th><th data-sort="implied">Implied value</th><th data-sort="sector">Sector &times;</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Click a row to open its detail view: how the value is worked out, its live-token
+    comparables, its farm plan and its risks. Every row is a protocol the snapshot records with no token.</p>
+    <section class="detail" id="detail" aria-live="polite"></section>
+  </section>
+  <section class="panel hidden" id="panel-live">
+    <h2>Live comparables</h2>
+    <p>These protocols already trade. Their market-cap / TVL ratios are the calibration this
+    board is priced on: each sector's median ratio, shrunk toward the whole-market median,
+    becomes the multiple its pre-token peers are valued at. The board never mixes a live
+    protocol's market value into the ranking itself.</p>
+    <div class="tablewrap">
+      <table id="livetable">
+        <thead><tr><th>#</th><th>Protocol</th><th>Category</th><th>TVL</th><th>Market cap</th><th>mcap / TVL</th><th>7d</th></tr></thead>
+        <tbody id="liverows"></tbody>
+      </table>
+    </div>
+    <h3>Sector multiples used</h3>
+    <div class="tablewrap">
+      <table id="sectortable">
+        <thead><tr><th>Sector</th><th>Live peers</th><th>Median mcap / TVL</th><th>Multiple used</th></tr></thead>
+        <tbody id="sectorrows"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel hidden" id="panel-method">
+    <h2>Method</h2>
+    <p><strong>Implied value</strong> is this entry's own claim, worked out from the sealed
+    2026-11-14 snapshot alone:</p>
+    <ol>
+      <li><strong>Sector multiple.</strong> For each sector, the median market-cap / TVL of its
+      live-token protocols (each sector's median capped at 1.00 first, so one wild peer
+      cannot set the multiple), shrunk toward the whole-market median (prior weight 5) so a
+      sector with few peers cannot set a wild multiple. Clamped to 0.05&ndash;1.00.</li>
+      <li><strong>Base.</strong> TVL &times; sector multiple.</li>
+      <li><strong>Growth.</strong> &times; (1 + 0.4 &times; 7-day TVL change, clamped to &minus;50%..+100%).</li>
+      <li><strong>Maturity.</strong> &times; (0.70 + age / 1095 days &times; 0.30); unknown age counts as 365 days.</li>
+      <li><strong>Chain breadth.</strong> &times; (1 + 0.02 per extra chain, up to 5).</li>
+    </ol>
+    <p><strong>Coverage.</strong> The board ranks all 40 watchlist protocols plus every other
+    rankable pre-token protocol in the snapshot &mdash; 226 rows, no arbitrary cap. A protocol
+    is pre-token when the snapshot records no market cap, no CoinGecko id and no symbol for it;
+    versioned pools (a name ending in V2, 2.0 and the like) and exchanges are left out.</p>
+    <p><strong>Farm plan.</strong> Six steps per protocol, derived from its own category, chains,
+    TVL and age: a fresh wallet, one capital position, one qualifying action a week, a hold of
+    30&ndash;60 days, claim only from the protocol's own published link, and a written farm log.
+    Risk notes come from the same record: young age, a sharp 7-day TVL fall, single-chain
+    concentration, and the category's own risks.</p>
+    <p><strong>What this is not.</strong> An implied value is not a prediction that a token will
+    be issued, when it will be issued, or what it will trade at. No protocol here has promised
+    a token. Nothing on this page is investment advice.</p>
+  </section>
+</main>
+<footer>Token Radar, model radar-2. Source: the sealed DefiLlama snapshot of 2026-11-14.
+Implied values are this entry's own claim from that snapshot alone.</footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
